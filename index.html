@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" style="color-scheme: dark;">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lingo — Translator</title>
+<meta name="theme-color" content="#2563eb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lingo">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='68' font-size='55' font-family='Georgia,serif' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E%3Ctext x='50' y='68' font-size='55' font-family='Georgia,serif' fill='white' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#0f2540; --paper:#ffffff; --line:#c9d8ec;
+  --accent:#2563eb; --accent-ink:#ffffff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ink:#eaf1fc; --paper:#0b1a30; --line:#1f3a5c;
+    --accent:#4f8ff7; --accent-ink:#0b1a30;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#eaf1fc; --paper:#0b1a30; --line:#1f3a5c;
+  --accent:#4f8ff7; --accent-ink:#0b1a30;
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%;}
+body{
+  height:100%;
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:Georgia, 'Iowan Old Style', serif;
+  display:flex; flex-direction:column;
+  align-items:center;
+}
+.wrap{
+  width:100%; max-width:480px;
+  padding:28px 20px 40px;
+}
+header{margin-bottom:22px;}
+h1{
+  font-size:1.5rem; margin:0 0 4px; font-weight:400;
+  letter-spacing:0.01em;
+}
+.sub{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:0.85rem; color:var(--ink); opacity:0.55; margin:0;
+}
+.langs{
+  display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+select{
+  flex:1; font-size:0.95rem; padding:10px 12px;
+  border:1px solid var(--line); border-radius:8px;
+  background:var(--paper); color:var(--ink);
+  font-family:inherit;
+}
+.swap{
+  border:1px solid var(--line); background:transparent; color:var(--ink);
+  width:38px; height:38px; border-radius:50%; font-size:1rem;
+  cursor:pointer; flex-shrink:0; transition:transform 0.2s ease;
+}
+.swap:active{transform:rotate(180deg);}
+textarea{
+  width:100%; min-height:110px; resize:vertical;
+  padding:14px; font-size:1.05rem; line-height:1.5;
+  border:1px solid var(--line); border-radius:10px;
+  background:var(--paper); color:var(--ink);
+  font-family:inherit; margin-bottom:12px;
+}
+textarea:focus, select:focus, button:focus{
+  outline:2px solid var(--accent); outline-offset:2px;
+}
+.out{
+  min-height:110px; padding:14px; border-radius:10px;
+  border:1px solid var(--line); background:var(--paper);
+  font-size:1.05rem; line-height:1.5; white-space:pre-wrap;
+  margin-bottom:14px;
+}
+.out.placeholder{opacity:0.4; font-style:italic;}
+button.go{
+  width:100%; padding:13px; font-size:1rem;
+  background:var(--accent); color:var(--accent-ink);
+  border:none; border-radius:10px; cursor:pointer;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+button.go:disabled{opacity:0.5; cursor:default;}
+.status{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:0.8rem; opacity:0.6; margin-top:10px; min-height:1em;
+}
+.note{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:0.75rem; opacity:0.45; margin-top:24px; line-height:1.5;
+}
+.tabs{
+  display:flex; gap:6px; margin-bottom:18px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+.tab{
+  flex:1; padding:9px; font-size:0.85rem;
+  border:1px solid var(--line); background:transparent; color:var(--ink);
+  border-radius:8px; cursor:pointer; opacity:0.6;
+}
+.tab.active{ opacity:1; background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+.inputRow, .outRow{ display:flex; gap:8px; align-items:stretch; }
+.inputRow textarea, .outRow .out{ flex:1; }
+.icon-btn{
+  border:1px solid var(--line); background:transparent; color:var(--ink);
+  width:44px; border-radius:10px; font-size:1.1rem; cursor:pointer; flex-shrink:0;
+}
+.icon-btn.active{ background:var(--accent); border-color:var(--accent); }
+.phrase-row{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 0; border-bottom:1px solid var(--line);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+.phrase-row .en{ opacity:0.6; font-size:0.85rem; }
+.phrase-row .local{ font-size:1.05rem; font-family:Georgia,serif; }
+.download{
+  width:100%; margin-top:28px; padding:12px; font-size:0.9rem;
+  background:transparent; color:var(--ink); border:1px solid var(--line);
+  border-radius:10px; cursor:pointer;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Lingo</h1>
+    <p class="sub">a small translator, built for coursework</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" id="tabTranslate">Translate</button>
+    <button class="tab" id="tabPhrasebook">Uganda phrasebook</button>
+  </div>
+
+  <div id="panelTranslate">
+    <div class="langs">
+      <select id="fromLang"></select>
+      <button class="swap" id="swapBtn" title="Swap languages" aria-label="Swap languages">⇄</button>
+      <select id="toLang"></select>
+    </div>
+
+    <div class="inputRow">
+      <textarea id="inputText" placeholder="Type or paste text to translate…"></textarea>
+      <button class="icon-btn" id="micBtn" title="Speak to type" aria-label="Voice input">🎤</button>
+    </div>
+
+    <button class="go" id="goBtn">Translate</button>
+
+    <div class="status" id="status" role="status">Ready.</div>
+
+    <div class="outRow">
+      <div class="out placeholder" id="output">Translation will appear here.</div>
+      <button class="icon-btn" id="speakBtn" title="Read aloud" aria-label="Read translation aloud">🔊</button>
+    </div>
+
+    <p class="note">Uses the free MyMemory translation API — results are machine-translated and may be imperfect for idioms or context-heavy phrases.</p>
+  </div>
+
+  <div id="panelPhrasebook" style="display:none;">
+    <p class="sub" style="margin-bottom:14px;">
+      Kiswahili is well covered by the live translator above. Luganda, Lusoga, and Runyoro/Rutooro
+      aren't supported by any free translation API yet, so here's a small built-in phrasebook instead.
+    </p>
+    <select id="dialectSel" style="width:100%; margin-bottom:16px;"></select>
+    <div id="phraseList"></div>
+  </div>
+
+  <button class="download" id="downloadBtn">Download this app</button>
+
+  <p class="note" style="text-align:center; margin-top:16px;">Created by Annie Hope</p>
+
+</div>
+
+<script>
+const LANGS = [
+  ["en","English"], ["es","Spanish"], ["fr","French"], ["de","German"],
+  ["it","Italian"], ["pt","Portuguese"], ["sw","Swahili"], ["lg","Luganda"],
+  ["ar","Arabic"], ["zh","Chinese"], ["ja","Japanese"], ["ru","Russian"],
+  ["hi","Hindi"], ["nl","Dutch"], ["ko","Korean"], ["tr","Turkish"],
+  ["rw","Kinyarwanda"]
+];
+
+const PHRASEBOOK = {
+  lg: { name: "Luganda", words: {
+    "hello":"Oli otya", "how are you":"Oli otya", "thank you":"Weebale",
+    "yes":"Yee", "no":"Nedda", "good":"Kirungi", "water":"Amazzi",
+    "food":"Emmere", "friend":"Munnange", "goodbye":"Weeraba",
+    "please":"Nkwegayiridde", "sorry":"Nsonyiwa", "welcome":"Tukusanyukidde",
+    "love":"Okwagala", "money":"Ssente", "home":"Awaka", "child":"Omwana",
+    "today":"Olwaleero", "tomorrow":"Enkya", "one":"Emu"
+  }},
+  xog: { name: "Lusoga", words: {
+    "hello":"Oli otya", "how are you":"Oli otya", "thank you":"Webale",
+    "yes":"Ye", "no":"Ngesi", "good":"Kirungi", "water":"Amaizi",
+    "food":"Ebyokulya", "friend":"Munange", "goodbye":"Ndaba",
+    "please":"Nsaba", "sorry":"Nsonyiwa", "welcome":"Twakusanyukidde",
+    "love":"Kwagala", "money":"Sente", "home":"Awaka", "child":"Omwana",
+    "today":"Olwaleero", "tomorrow":"Nkya", "one":"Emu"
+  }},
+  nyn: { name: "Runyoro/Rutooro", words: {
+    "hello":"Oraire ota", "how are you":"Oraire ota", "thank you":"Webale",
+    "yes":"Nsiga", "no":"Ndaba", "good":"Kurungi", "water":"Amaizi",
+    "food":"Ebyokulya", "friend":"Munywani", "goodbye":"Ndagenda",
+    "please":"Nkusaba", "sorry":"Nsaasire", "welcome":"Waraire",
+    "love":"Kugonza", "money":"Sente", "home":"Omuka", "child":"Omwana",
+    "today":"Erizooba", "tomorrow":"Nyenkya", "one":"Emu"
+  }}
+};
+
+const fromSel = document.getElementById('fromLang');
+const toSel = document.getElementById('toLang');
+const input = document.getElementById('inputText');
+const output = document.getElementById('output');
+const status = document.getElementById('status');
+const goBtn = document.getElementById('goBtn');
+const swapBtn = document.getElementById('swapBtn');
+
+function fillSelect(sel, defaultCode){
+  LANGS.forEach(([code, name]) => {
+    const opt = document.createElement('option');
+    opt.value = code; opt.textContent = name;
+    if(code === defaultCode) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+fillSelect(fromSel, 'en');
+fillSelect(toSel, 'es');
+
+swapBtn.addEventListener('click', () => {
+  const a = fromSel.value;
+  fromSel.value = toSel.value;
+  toSel.value = a;
+});
+
+function speakText(text, lang){
+  if(!('speechSynthesis' in window) || !text) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+/* ---------- Translation (fixed) ---------- */
+
+// Common abbreviations so we can expand them before sending to the API.
+const ABBREVIATIONS = {
+  "hlo": "hello", "helo": "hello", "hi": "hi", "hey": "hey",
+  "thx": "thanks", "tnx": "thanks", "pls": "please", "plz": "please",
+  "u": "you", "ur": "your", "r": "are", "y": "why",
+  "gm": "good morning", "gn": "good night", "btw": "by the way",
+  "idk": "I don't know", "omg": "oh my god", "lol": "laughing out loud"
+};
+
+function expandAbbreviations(text){
+  // Only expand if the whole input is a single short token.
+  const trimmed = text.trim().toLowerCase();
+  if(!trimmed.includes(" ") && ABBREVIATIONS[trimmed]){
+    return ABBREVIATIONS[trimmed];
+  }
+  return text;
+}
+
+async function translate(){
+  const raw = input.value.trim();
+  if(!raw){
+    status.textContent = 'Type something first.';
+    return;
+  }
+  const from = fromSel.value, to = toSel.value;
+
+  if(from === to){
+    output.textContent = raw;
+    output.classList.remove('placeholder');
+    status.textContent = '';
+    return;
+  }
+
+  // Expand abbreviations like "hlo" -> "hello" before sending.
+  const text = expandAbbreviations(raw);
+
+  goBtn.disabled = true;
+  status.textContent = 'Translating…';
+  output.classList.add('placeholder');
+  output.textContent = '…';
+
+  try{
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}&mt=1`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('Network error');
+    const data = await res.json();
+    let translated = data?.responseData?.translatedText;
+
+    const clean = (s) => (s || '').trim().toLowerCase();
+    const isEcho = translated && clean(translated) === clean(text);
+
+    // If the API echoed our input or returned nothing useful,
+    // scan the match list for a real, different translation.
+    if((!translated || isEcho) && Array.isArray(data?.matches)){
+      const candidates = data.matches
+        .filter(m => m.translation && clean(m.translation) !== clean(text))
+        // Prefer matches with higher score, but ignore obviously bad ones.
+        .sort((a, b) => (b.match || 0) - (a.match || 0));
+      if(candidates.length) translated = candidates[0].translation;
+    }
+
+    if(!translated) throw new Error('No translation returned');
+
+    output.textContent = translated;
+    output.classList.remove('placeholder');
+
+    // Build a helpful status message.
+    const notes = [];
+    if(raw !== text){
+      notes.push(`Expanded "${raw}" → "${text}" before translating.`);
+    }
+    if(text.split(/\s+/).length === 1){
+      notes.push('Single words can mistranslate — try a short phrase for better accuracy.');
+    }
+    if(isEcho && clean(translated) === clean(text)){
+      notes.push('The API returned the input unchanged — it may not know this word.');
+    }
+    status.textContent = notes.join(' ');
+
+    speakText(translated, to);
+  } catch(err){
+    output.textContent = 'Could not translate right now. Check your connection and try again.';
+    output.classList.remove('placeholder');
+    status.textContent = '';
+  } finally {
+    goBtn.disabled = false;
+  }
+}
+
+goBtn.addEventListener('click', translate);
+input.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' && (e.metaKey || e.ctrlKey)) translate();
+});
+
+/* ---------- Tabs ---------- */
+const tabTranslate = document.getElementById('tabTranslate');
+const tabPhrasebook = document.getElementById('tabPhrasebook');
+const panelTranslate = document.getElementById('panelTranslate');
+const panelPhrasebook = document.getElementById('panelPhrasebook');
+tabTranslate.addEventListener('click', () => {
+  tabTranslate.classList.add('active'); tabPhrasebook.classList.remove('active');
+  panelTranslate.style.display = ''; panelPhrasebook.style.display = 'none';
+});
+tabPhrasebook.addEventListener('click', () => {
+  tabPhrasebook.classList.add('active'); tabTranslate.classList.remove('active');
+  panelPhrasebook.style.display = ''; panelTranslate.style.display = 'none';
+});
+
+/* ---------- Phrasebook ---------- */
+const dialectSel = document.getElementById('dialectSel');
+const phraseList = document.getElementById('phraseList');
+Object.entries(PHRASEBOOK).forEach(([code, data]) => {
+  const opt = document.createElement('option');
+  opt.value = code; opt.textContent = data.name;
+  dialectSel.appendChild(opt);
+});
+function renderPhrasebook(){
+  const data = PHRASEBOOK[dialectSel.value];
+  phraseList.innerHTML = '';
+  Object.entries(data.words).forEach(([en, local]) => {
+    const row = document.createElement('div');
+    row.className = 'phrase-row';
+    row.innerHTML = `<span class="en">${en}</span><span class="local">${local}</span>`;
+    phraseList.appendChild(row);
+  });
+}
+dialectSel.addEventListener('change', renderPhrasebook);
+renderPhrasebook();
+
+/* ---------- Speak translation aloud ---------- */
+const speakBtn = document.getElementById('speakBtn');
+speakBtn.addEventListener('click', () => {
+  const text = output.textContent.trim();
+  if(!text || output.classList.contains('placeholder')) return;
+  if(!('speechSynthesis' in window)){
+    status.textContent = 'Voice output is not supported on this device.';
+    return;
+  }
+  speakText(text, toSel.value);
+});
+
+/* ---------- Voice input ---------- */
+const micBtn = document.getElementById('micBtn');
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(!SpeechRec){
+  micBtn.style.display = 'none';
+} else {
+  let recognizing = false;
+  let recognizer = null;
+  micBtn.addEventListener('click', () => {
+    if(recognizing){ recognizer && recognizer.stop(); return; }
+    recognizer = new SpeechRec();
+    recognizer.lang = fromSel.value;
+    recognizer.interimResults = false;
+    recognizer.maxAlternatives = 1;
+    recognizer.onstart = () => { recognizing = true; micBtn.classList.add('active'); status.textContent = 'Listening…'; };
+    recognizer.onend = () => { recognizing = false; micBtn.classList.remove('active'); if(status.textContent === 'Listening…') status.textContent = ''; };
+    recognizer.onerror = () => { status.textContent = 'Could not hear you — try typing instead.'; };
+    recognizer.onresult = (e) => {
+      input.value = (input.value ? input.value + ' ' : '') + e.results[0][0].transcript;
+    };
+    try{ recognizer.start(); } catch(e){ status.textContent = 'Voice input unavailable.'; }
+  });
+}
+
+/* ---------- Download ---------- */
+(() => {
+  const downloadBtn = document.getElementById('downloadBtn');
+
+  function plainBrowserDownload(){
+    try{
+      const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lingo-translator.html';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      status.textContent = 'If nothing happened, try opening this page in Chrome directly.';
+    } catch(e){
+      status.textContent = 'Download failed. Try opening this link in Chrome instead of the Claude app.';
+    }
+  }
+
+  downloadBtn.addEventListener('click', async () => {
+    status.textContent = 'Preparing download…';
+    let usedCapability = false;
+    try{
+      if(window.claude && typeof window.claude.use === 'function'){
+        const downloads = await window.claude.use('downloads');
+        if(downloads){
+          usedCapability = true;
+          const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+          await downloads.save({ filename: 'lingo-translator.html', data: html });
+          status.textContent = 'Saved.';
+          return;
+        }
+      }
+    } catch(e){
+      status.textContent = 'That method didn’t work here — trying another way…';
+    }
+    if(!usedCapability) plainBrowserDownload();
+  });
+})();
+</script>
+</body>
+</html>
